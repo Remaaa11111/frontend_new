@@ -1,0 +1,673 @@
+{
+	"info": {
+		"_postman_id": "cf2f454b-608c-48d8-9935-0c01b1b022ae",
+		"name": "db_tokobuku",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39840531"
+	},
+	"item": [
+		{
+			"name": "books",
+			"item": [
+				{
+					"name": "/api/books",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{CnC}}/api/books/",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"books",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/books/create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "judul",
+									"value": "cara menjadi sigma",
+									"type": "text"
+								},
+								{
+									"key": "penulis",
+									"value": "Dyan",
+									"type": "text"
+								},
+								{
+									"key": "id_jenis",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "tersedia",
+									"type": "text"
+								},
+								{
+									"key": "tanggal_pinjam",
+									"value": "2025-06-24",
+									"type": "text"
+								},
+								{
+									"key": "tanggal_kembali",
+									"value": "2024-06-27",
+									"type": "text"
+								},
+								{
+									"key": "cover_image",
+									"value": "https://th.bing.com/th/id/OSK.56824888c78d672aece69be7be5d66a2?w=120&h=168&c=7&rs=1&qlt=80&o=6&cb=ircwebp1&dpr=1.5&pid=SANGAM",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{CnC}}/api/books/create",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"books",
+								"create"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/books/update/id_books",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "judul",
+									"value": "belajar flaskk",
+									"type": "text"
+								},
+								{
+									"key": "penulis",
+									"value": "Teguh Dermawann",
+									"type": "text"
+								},
+								{
+									"key": "id_jenis",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "tersedia",
+									"type": "text"
+								},
+								{
+									"key": "tanggal_pinjam",
+									"value": "2024-06-01",
+									"type": "text"
+								},
+								{
+									"key": "tanggal_kembali",
+									"value": "2024-06-10",
+									"type": "text"
+								},
+								{
+									"key": "cover_image",
+									"value": "https://th.bing.com/th/id/OSK.56824888c78d672aece69be7be5d66a2?w=120&h=168&c=7&rs=1&qlt=80&o=6&cb=ircwebp1&dpr=1.5&pid=SANGAM",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{CnC}}/api/books/update/4",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"books",
+								"update",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/books/delete/id_books",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{CnC}}/api/books/delete/4",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"books",
+								"delete",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "protected",
+			"item": [
+				{
+					"name": "/api/protected/me",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc1MTM5MTE1MSwianRpIjoiNTM1MmU3ZmYtNzk4Yi00YzUzLTg5NjUtOGRiNWIxMWVmZjg1IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImFtYXJhZ2l0YWEiLCJuYmYiOjE3NTEzOTExNTEsImNzcmYiOiJkNTMxNDQxZS05Y2ZlLTQ4NTYtOWYzOC1iYWMxMDlhNTJjNDUiLCJleHAiOjE3NTEzOTQ3NTF9._TrEvsm_U82spNNtzcpkmcNfX9aG_PdTYHpdQ1kMO5Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{CnC}}/api/protected/me",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"protected",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "member",
+			"item": [
+				{
+					"name": "/api/members",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "nama_jenis",
+									"value": "sejarah",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{CnC}}/api/members",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/members/create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "nama",
+									"value": "Amaragitaaa",
+									"type": "text"
+								},
+								{
+									"key": "telepon",
+									"value": "+62 897-7217-561",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "amaragita@student.undiksha.ac.id",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{CnC}}/api/members/create",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"members",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/members/update/id_member",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "nama",
+									"value": "Amaragitaaaa",
+									"type": "text"
+								},
+								{
+									"key": "telepon",
+									"value": "+62 897-7217-562",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "amaragita@student.undiksha.ac.id",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{CnC}}/api/members/update/3",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"members",
+								"update",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/members/delete/id_member",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "nama",
+									"value": "Amaragitaa",
+									"type": "text"
+								},
+								{
+									"key": "telepon",
+									"value": "+62 897-7217-561",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "amaragita@student.undiksha.ac.id",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{CnC}}/api/members/delete/5",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"members",
+								"delete",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "loan",
+			"item": [
+				{
+					"name": "api/loans",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "nama",
+									"value": "Amaragita",
+									"type": "text"
+								},
+								{
+									"key": "telepon",
+									"value": "+62 897-7217-561",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "amaragita@student.undiksha.ac.id",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{CnC}}/api/loans",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"loans"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/loans/create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "id_buku",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "id_anggota",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "tanggal_pinjam",
+									"value": "2025-06-21",
+									"type": "text"
+								},
+								{
+									"key": "tanggal_kembali",
+									"value": "2025-06-28",
+									"type": "text"
+								},
+								{
+									"key": "denda",
+									"value": "0",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{CnC}}/api/loans/create",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"loans",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/loans/update/id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "id_buku",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "id_anggota",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "tanggal_pinjam",
+									"value": "2025-06-25",
+									"type": "text"
+								},
+								{
+									"key": "tanggal_kembali",
+									"value": "2025-06-27",
+									"type": "text"
+								},
+								{
+									"key": "denda",
+									"value": "155.001",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{CnC}}/api/loans/update/3",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"loans",
+								"update",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/loans//delete/id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "id_buku",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "id_anggota",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "tanggal_pinjam",
+									"value": "2025-06-25",
+									"type": "text"
+								},
+								{
+									"key": "tanggal_kembali",
+									"value": "2025-06-30",
+									"type": "text"
+								},
+								{
+									"key": "denda",
+									"value": "150.000",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{CnC}}/api/loans/delete/4",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"loans",
+								"delete",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Authe",
+			"item": [
+				{
+					"name": "/api/auth/register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "amaragitaa",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "gitaa",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{CnC}}/api/auth/register",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/auth/login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "rema",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "remaa",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{CnC}}/api/auth/login",
+							"host": [
+								"{{CnC}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "flask_local",
+			"value": "http://localhost:5000",
+			"type": "default"
+		},
+		{
+			"key": "ngrok",
+			"value": "https://cd74-180-249-185-196.ngrok-free.app/",
+			"type": "default"
+		},
+		{
+			"key": "CC",
+			"value": "https://scarcely-calm-monitor.ngrok-free.app/",
+			"type": "default"
+		},
+		{
+			"key": "CnC",
+			"value": "https://scarcely-calm-monitor.ngrok-free.app/",
+			"type": "default"
+		}
+	]
+}
