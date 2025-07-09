@@ -92,7 +92,7 @@ const History = () => {
         let color = 'default';
 
         if (status === 'returned') color = 'green';
-        else if (status === 'cancelled') color = 'red';
+        else if (status === 'canceled') color = 'red';
         else if (status === 'dipinjam') color = 'blue';
 
         return <Tag color={color}>{upper}</Tag>;
@@ -151,7 +151,7 @@ const History = () => {
           >
             <Option value="all">Semua Status</Option>
             <Option value="returned">Returned</Option>
-            <Option value="cancelled">Cancelled</Option>
+            <Option value="canceled">Canceled</Option>
             <Option value="dipinjam">Dipinjam</Option>
           </Select>
         </Space>
