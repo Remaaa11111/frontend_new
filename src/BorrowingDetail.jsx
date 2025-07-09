@@ -35,14 +35,23 @@ const BorrowingDetail = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const token = localStorage.getItem('access_token');
         const apiUrl = import.meta.env.VITE_REACT_APP_API_URL;
 
-        const resBorrowing = await fetch(`${apiUrl}/api/loans/${id}`);
+        const resBorrowing = await fetch(`${apiUrl}/api/loans/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!resBorrowing.ok) throw new Error('Gagal mengambil data peminjaman');
         const loanData = await resBorrowing.json();
         setBorrowing(loanData);
 
-        const resBook = await fetch(`${apiUrl}/api/books/${loanData.book_id}`);
+        const resBook = await fetch(`${apiUrl}/api/books/${loanData.book_id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!resBook.ok) throw new Error('Gagal mengambil data buku');
         const bookData = await resBook.json();
         setBook(bookData);

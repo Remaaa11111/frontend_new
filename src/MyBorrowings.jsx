@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Layout,
-  Table,
-  Tag,
-  Button,
-  Typography,
-  Space,
-  Spin,
-  message,
-} from 'antd';
+import { Layout, Table, Tag, Button, Typography, Space, Spin, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
 
@@ -20,9 +11,34 @@ const MyBorrowings = () => {
   const [borrowings, setBorrowings] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const userId = localStorage.getItem('user_id');
+  const token = localStorage.getItem('access_token');
+
   const fetchBorrowings = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/loans/');
+      if (!token) {
+        message.error('User not authenticated');
+        navigate('/login');
+        return;
+      }
+      
+      if (!userId) {
+        message.error('User belum login!');
+        navigate('/login');
+        return;
+      }
+
+      const res = await fetch(`http://localhost:5000/api/loans/user/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,  // Include the JWT token in the headers
+        },
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`API error: ${res.status} - ${text}`);
+      }
+
       const data = await res.json();
       setBorrowings(data);
     } catch (err) {
@@ -45,8 +61,8 @@ const MyBorrowings = () => {
     },
     {
       title: 'Borrower',
-      dataIndex: 'nama_user',
-      key: 'nama_user',
+      dataIndex: 'email_user',
+      key: 'email_user',
     },
     {
       title: 'Borrow Date',
@@ -80,21 +96,12 @@ const MyBorrowings = () => {
 
   return (
     <Layout style={{ background: '#fff' }}>
-      <Header
-        style={{
-          background: '#fff',
-          padding: '0 24px',
-          borderBottom: '1px solid #f0f0f0',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
+      <Header style={{ background: '#fff', padding: '0 24px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={2} style={{ margin: 0 }}>
           My Borrowings
         </Title>
         <Space>
-          <Button type="text" icon={<LogoutOutlined />} onClick={() => navigate('/')}>
+          <Button type="text" icon={<LogoutOutlined />} onClick={() => navigate('/login')}>
             Sign Out
           </Button>
           <Button shape="circle" icon={<UserOutlined />} onClick={() => navigate('/profile')} />

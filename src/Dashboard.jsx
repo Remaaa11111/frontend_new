@@ -132,7 +132,7 @@ const Dashboard = () => {
                         <Button
                             type="text"
                             icon={<LogoutOutlined style={{ color: '#8c8c8c' }} />}
-                            onClick={() => navigate('/')}
+                            onClick={() => navigate('/login')}
                             style={{ color: '#8c8c8c', fontWeight: 500 }}
                         >
                             Sign Out

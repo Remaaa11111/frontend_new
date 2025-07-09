@@ -4,31 +4,40 @@ import { UserOutlined, BookOutlined, BarChartOutlined, CheckCircleOutlined, Logo
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../providers/AuthProvider";
+import { getDataWithToken } from "../utils/api";
 
 const { Title } = Typography;
 
 const AdminDashboard = () => {
-  const [borrowedCount, setBorrowedCount] = useState(12); // dummy
-  const [userCount, setUserCount] = useState(34); // dummy
-  const [recentActivity, setRecentActivity] = useState([
-    { id: 1, activity: "Buku 'React Handbook' dipinjam oleh Budi" },
-    { id: 2, activity: "Buku 'Python Dasar' dikembalikan oleh Sari" },
-    { id: 3, activity: "Buku 'UI/UX Design' dipinjam oleh Andi" },
-  ]);
+  const [jumlahBukuDipinjam, setJumlahBukuDipinjam] = useState(0);
+  const [jumlahPengguna, setJumlahPengguna] = useState(0);
+  const [aktivitasTerakhir, setAktivitasTerakhir] = useState([]);
+  const token = localStorage.getItem('token');
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // Nanti bisa fetch data statistik dari API di sini
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   useEffect(() => {
-    // fetch('/api/books/borrowed-count').then(...)
-    // fetch('/api/members/count').then(...)
-    // fetch('/api/loans/recent').then(...)
-  }, []);
+    // Buku dipinjam
+    getDataWithToken("http://localhost:5000/api/loans/", token)
+      .then(data => {
+        setJumlahBukuDipinjam(data.filter(item => item.status === "borrowed").length);
+        setAktivitasTerakhir(data.slice(0, 3));
+      });
+
+    // Jumlah pengguna
+    getDataWithToken("http://localhost:5000/api/users/", token)
+      .then(data => setJumlahPengguna(data.length));
+  }, [token]);
 
   return (
     <div style={{ background: '#fff', minHeight: '100vh', padding: 8, marginLeft: 220 }}>
       <Space style={{ position: "absolute", right: 32, top: 24, zIndex: 20 }}>
-        <Button type="text" icon={<LogoutOutlined />} onClick={logout}>
+        <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout}>
           Sign Out
         </Button>
         <Button
@@ -37,14 +46,14 @@ const AdminDashboard = () => {
           onClick={() => navigate('/admin/profile')}
         />
       </Space>
-      <Title level={2}>Dashboard Admin</Title>
+      <Title level={2}>Dashboard</Title>
       <Divider />
       <Row gutter={24}>
         <Col xs={24} sm={12} md={8}>
           <Card bordered={false} style={{ marginBottom: 24 }}>
             <Statistic
-              title="Buku Dipinjam"
-              value={borrowedCount}
+              title="Books Borrowed"
+              value={jumlahBukuDipinjam}
               prefix={<BookOutlined style={{ color: '#1890ff' }} />}
             />
           </Card>
@@ -52,8 +61,8 @@ const AdminDashboard = () => {
         <Col xs={24} sm={12} md={8}>
           <Card bordered={false} style={{ marginBottom: 24 }}>
             <Statistic
-              title="Jumlah Pengguna"
-              value={userCount}
+              title="Total Users"
+              value={jumlahPengguna}
               prefix={<UserOutlined style={{ color: '#52c41a' }} />}
             />
           </Card>
@@ -61,22 +70,28 @@ const AdminDashboard = () => {
         <Col xs={24} sm={24} md={8}>
           <Card bordered={false} style={{ marginBottom: 24 }}>
             <Statistic
-              title="Aktivitas Terakhir"
-              value={recentActivity.length}
+              title="Recent Activities"
+              value={aktivitasTerakhir.length}
               prefix={<BarChartOutlined style={{ color: '#faad14' }} />}
             />
           </Card>
         </Col>
       </Row>
-      <Divider>Aktivitas Terakhir</Divider>
+      <Divider>Recent Activities</Divider>
       <Card bordered={false} style={{ marginBottom: 24 }}>
         <ul style={{ paddingLeft: 20 }}>
-          {recentActivity.map((item) => (
-            <li key={item.id}>{item.activity}</li>
+          {aktivitasTerakhir.map((item) => (
+            <li key={item.id_peminjaman}>
+              {item.status === "borrowed"
+                ? `Book '${item.judul_buku}' borrowed by ${item.email_user}`
+                : item.status === "returned"
+                ? `Book '${item.judul_buku}' returned by ${item.email_user}`
+                : null}
+            </li>
           ))}
         </ul>
       </Card>
-      <Divider>Menu Admin</Divider>
+      <Divider>Admin Menu</Divider>
       <Row gutter={16}>
         <Col xs={24} sm={12} md={8}>
           <Button
@@ -87,7 +102,7 @@ const AdminDashboard = () => {
             onClick={() => navigate("/admin/books")}
             style={{ marginBottom: 16 }}
           >
-            Manajemen Buku
+            Book Management
           </Button>
         </Col>
         <Col xs={24} sm={12} md={8}>
@@ -99,7 +114,7 @@ const AdminDashboard = () => {
             onClick={() => navigate("/admin/transactions")}
             style={{ marginBottom: 16 }}
           >
-            Verifikasi Transaksi
+            Loan Verification
           </Button>
         </Col>
         <Col xs={24} sm={12} md={8}>
@@ -111,7 +126,7 @@ const AdminDashboard = () => {
             onClick={() => navigate("/admin/users")}
             style={{ marginBottom: 16 }}
           >
-            Manajemen Pengguna
+            User Management
           </Button>
         </Col>
       </Row>

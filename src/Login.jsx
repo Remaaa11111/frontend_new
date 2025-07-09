@@ -4,6 +4,8 @@ import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { notification } from 'antd';
 import { AuthContext } from './providers/AuthProvider';
 import styles from './Login.module.css';
+import logo from './assets/logo.png';
+import bookshelfBg from './assets/bookshelf.jpg';
 
 // Fungsi kirim data login ke backend
 const sendData = async (url, formData) => {
@@ -27,16 +29,30 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('email', email);
-    formData.append('password', password);
-    formData.append('role', role); // ⬅️ kirim role ke backend
+    // const formData = new FormData();
+    // formData.append('email', email);
+    // formData.append('password', password);
+    // formData.append('role', role);
+
+    const payload = {
+      email,
+      password,
+      role,
+    };
 
     try {
-      const { ok, data } = await sendData("http://127.0.0.1:5000/api/auth/login", formData);
-      if (ok && data?.access_token) {
+      const response = await fetch("http://127.0.0.1:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (response.ok && data?.access_token) {
         // ⬇️ SIMPAN TOKEN DI LOCAL STORAGE
         localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("user", JSON.stringify(data.user)); // <-- pastikan data.user ada id-nya
 
         login(data.access_token); // simpan ke context juga
 
@@ -66,20 +82,16 @@ const Login = () => {
     <>
       {contextHolder}
       <div className={styles.container}>
-        <div className={styles.left}>
-          {/* SVG dekoratif */}
-          <svg width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="320" height="320" rx="20" fill="#4B7CA8" />
-            <g>
-              <rect x="60" y="40" width="120" height="200" rx="16" fill="#fff" stroke="#222" strokeWidth="3" />
-              <ellipse cx="120" cy="120" rx="20" ry="20" fill="#222" />
-              <rect x="100" y="140" width="80" height="24" rx="6" fill="#FFA726" />
-              <rect x="90" y="170" width="90" height="20" rx="6" fill="#66BB6A" />
-              <rect x="110" y="195" width="70" height="16" rx="6" fill="#66BB6A" />
-              <rect x="120" y="60" width="50" height="6" rx="3" fill="#E57373" />
-              <rect x="120" y="75" width="60" height="6" rx="3" fill="#64B5F6" />
-            </g>
-          </svg>
+        <div
+          className={styles.left}
+          style={{
+            backgroundImage: `url(${bookshelfBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
+          {/* Logo dihapus, hanya background bookshelf */}
         </div>
 
         <div className={styles.right}>

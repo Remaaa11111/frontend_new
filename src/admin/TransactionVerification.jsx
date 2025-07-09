@@ -4,32 +4,9 @@ import { CheckCircleOutlined, SearchOutlined, ReloadOutlined, LogoutOutlined, Us
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../providers/AuthProvider";
+import { getData, sendData } from "../utils/api"; // Import functions for API calls
 
 const { Title } = Typography;
-
-const dummyTransactions = [
-  {
-    id: 1,
-    user: "Budi",
-    book: "React Handbook",
-    status: "Menunggu Pengambilan",
-    date: "2024-07-08",
-  },
-  {
-    id: 2,
-    user: "Sari",
-    book: "Python Dasar",
-    status: "Dipinjam",
-    date: "2024-07-07",
-  },
-  {
-    id: 3,
-    user: "Andi",
-    book: "UI/UX Design",
-    status: "Menunggu Pengambilan",
-    date: "2024-07-06",
-  },
-];
 
 const TransactionVerification = () => {
   const [transactions, setTransactions] = useState([]);
@@ -39,83 +16,143 @@ const TransactionVerification = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Nanti fetch dari API
-    setTransactions(dummyTransactions);
+    getTransactions();
   }, []);
 
-  const handleSearch = (e) => {
-    setSearchText(e.target.value.toLowerCase());
+  // Get all transactions
+  const getTransactions = () => {
+    const accessToken = localStorage.getItem('access_token');
+    fetch('/api/loans/', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      }
+    })
+      .then(res => res.json())
+      .then(setTransactions)
+      .catch(err => console.error("Error fetching transactions:", err));
   };
+
+  const handleSearch = (e) => setSearchText(e.target.value.toLowerCase());
 
   const filteredTransactions = transactions.filter(
     (item) =>
-      item.user.toLowerCase().includes(searchText) ||
-      item.book.toLowerCase().includes(searchText) ||
-      String(item.id).includes(searchText)
+      item.email_user.toLowerCase().includes(searchText) ||
+      item.judul_buku.toLowerCase().includes(searchText) ||
+      String(item.id_peminjaman).includes(searchText)
   );
 
+  // Handle status update
   const handleVerify = (record, type) => {
-    // Nanti update status via API
     let newStatus = record.status;
     let notifMsg = '';
     let notifDesc = '';
-    if (type === "Pengambilan") {
-      newStatus = "Dipinjam";
-      notifMsg = `Verifikasi Pengambilan Berhasil`;
-      notifDesc = `Transaksi untuk ${record.user} - ${record.book} sudah diverifikasi sebagai Dipinjam.`;
-    } else if (type === "Pengembalian" || type === "Kembalikan") {
-      newStatus = "Selesai";
-      notifMsg = `Buku Sudah Dikembalikan`;
-      notifDesc = `Transaksi untuk ${record.user} - ${record.book} sudah selesai (dikembalikan).`;
+    if (type === "Pickup" || type === "Pengambilan") {
+      newStatus = "borrowed";
+      notifMsg = `Pickup Verification Successful`;
+      notifDesc = `Transaction for ${record.email_user} - ${record.judul_buku} has been verified as Borrowed.`;
+    } else if (type === "Return" || type === "Kembalikan") {
+      newStatus = "returned";
+      notifMsg = `Book Returned`;
+      notifDesc = `Transaction for ${record.email_user} - ${record.judul_buku} has been completed (returned).`;
     }
-    api.success({
-      message: notifMsg,
-      description: notifDesc,
-    });
-    setTransactions((prev) =>
-      prev.map((item) =>
-        item.id === record.id
-          ? { ...item, status: newStatus }
-          : item
-      )
-    );
+
+    const accessToken = localStorage.getItem('access_token');
+    const payload = {
+      tanggal_kembali: new Date().toISOString().slice(0, 10),
+      status: newStatus,
+    };
+
+    fetch(`/api/loans/update/${record.id_peminjaman}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+      .then(async res => {
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Gagal update");
+        }
+        return res.json();
+      })
+      .then(() => {
+        api.success({
+          message: notifMsg,
+          description: notifDesc,
+        });
+        setTransactions((prev) =>
+          prev.map((item) =>
+            item.id_peminjaman === record.id_peminjaman
+              ? { ...item, status: newStatus }
+              : item
+          )
+        );
+      })
+      .catch((err) => {
+        api.error({
+          message: "Error Occurred",
+          description: err.message || "Failed to update transaction status.",
+        });
+      });
   };
 
+  // Handle cancel
   const handleCancel = (record) => {
     api.info({
-      message: "Pengambilan Dibatalkan",
-      description: `Transaksi untuk ${record.user} - ${record.book} telah dibatalkan.`,
+      message: "Pickup Cancelled",
+      description: `Transaction for ${record.email_user} - ${record.judul_buku} has been cancelled.`,
     });
-    setTransactions((prev) =>
-      prev.map((item) =>
-        item.id === record.id
-          ? { ...item, status: "Dibatalkan" }
-          : item
-      )
-    );
+
+    const formData = new FormData();
+    formData.append('tanggal_kembali', new Date().toISOString().slice(0, 10));
+    formData.append('status', 'cancelled');
+
+    sendData(
+      `/api/loans/update/${record.id_peminjaman}`,
+      formData,
+      'PUT', // <-- HARUS 'PUT'
+      true // isFormData
+    )
+      .then(() => {
+        setTransactions((prev) =>
+          prev.map((item) =>
+            item.id_peminjaman === record.id_peminjaman
+              ? { ...item, status: "cancelled" }
+              : item
+          )
+        );
+      })
+      .catch((err) => {
+        api.error({
+          message: "Error Occurred",
+          description: "Failed to cancel transaction.",
+        });
+      });
   };
 
   const columns = [
     {
       title: "ID",
-      dataIndex: "id",
+      dataIndex: "id_peminjaman",
       key: "id",
       width: 60,
     },
     {
-      title: "Nama Pengguna",
-      dataIndex: "user",
+      title: "User Email",
+      dataIndex: "email_user",
       key: "user",
     },
     {
-      title: "Judul Buku",
-      dataIndex: "book",
+      title: "Book Title",
+      dataIndex: "judul_buku",
       key: "book",
     },
     {
-      title: "Tanggal",
-      dataIndex: "date",
-      key: "date",
+      title: "Borrow Date",
+      dataIndex: "tanggal_pinjam",
+      key: "tanggal_pinjam",
     },
     {
       title: "Status",
@@ -123,46 +160,50 @@ const TransactionVerification = () => {
       key: "status",
       render: (status) => {
         let color = "default";
-        if (status === "Menunggu Pengambilan") color = "orange";
-        else if (status === "Dipinjam") color = "blue";
-        else if (status === "Selesai") color = "green";
-        else if (status === "Dibatalkan") color = "red";
+        if (status === "scheduled") color = "orange";
+        else if (status === "borrowed") color = "blue";
+        else if (status === "returned") color = "green";
+        else if (status === "cancelled") color = "red";
         return <Tag color={color}>{status}</Tag>;
       },
     },
     {
-      title: "Aksi",
+      title: "Action",
       key: "action",
       render: (_, record) => (
         <Space>
-          {record.status === "Menunggu Pengambilan" && (
+          {record.status === "scheduled" && (
             <>
               <Popconfirm
-                title="Verifikasi Pengambilan?"
-                onConfirm={() => handleVerify(record, "Pengambilan")}
-                okText="Ya"
-                cancelText="Batal"
+                title="Verify Pickup?"
+                onConfirm={() => handleVerify(record, "Pickup")}
+                okText="Yes"
+                cancelText="No"
               >
-                <Button type="primary" icon={<CheckCircleOutlined />}>Verifikasi Pengambilan</Button>
+                <Button type="primary" icon={<CheckCircleOutlined />}>
+                  Verify Pickup
+                </Button>
               </Popconfirm>
               <Popconfirm
-                title="Batalkan Pengambilan?"
+                title="Cancel Pickup?"
                 onConfirm={() => handleCancel(record)}
-                okText="Ya"
-                cancelText="Batal"
+                okText="Yes"
+                cancelText="No"
               >
-                <Button danger style={{ marginLeft: 8 }}>Batalkan Pengambilan</Button>
+                <Button danger style={{ marginLeft: 8 }}>
+                  Cancel Pickup
+                </Button>
               </Popconfirm>
             </>
           )}
-          {record.status === "Dipinjam" && (
+          {record.status === "borrowed" && (
             <Popconfirm
-              title="Kembalikan Buku?"
-              onConfirm={() => handleVerify(record, "Kembalikan")}
-              okText="Ya"
-              cancelText="Tidak"
+              title="Return Book?"
+              onConfirm={() => handleVerify(record, "Return")}
+              okText="Yes"
+              cancelText="No"
             >
-              <Button type="primary">Kembalikan Buku</Button>
+              <Button type="primary">Return Book</Button>
             </Popconfirm>
           )}
         </Space>
@@ -176,30 +217,26 @@ const TransactionVerification = () => {
         <Button type="text" icon={<LogoutOutlined />} onClick={() => { logout(); navigate('/login'); }}>
           Sign Out
         </Button>
-        <Button
-          shape="circle"
-          icon={<UserOutlined />}
-          onClick={() => navigate('/admin/profile')}
-        />
+        <Button shape="circle" icon={<UserOutlined />} onClick={() => navigate('/admin/profile')} />
       </Space>
       {contextHolder}
       <Card bordered={false} style={{ marginBottom: 24 }}>
-        <Title level={3}>Verifikasi Pengambilan / Pengembalian Buku</Title>
+        <Title level={3}>Book Pickup / Return Verification</Title>
         <Input
           prefix={<SearchOutlined />}
-          placeholder="Cari nama/ID pengguna atau judul buku"
+          placeholder="Search user name/ID or book title"
           allowClear
           size="large"
           style={{ maxWidth: 400, margin: '16px 0' }}
           onChange={handleSearch}
         />
-        <Button icon={<ReloadOutlined />} onClick={() => setTransactions(dummyTransactions)} style={{ marginLeft: 8 }}>
+        <Button icon={<ReloadOutlined />} onClick={() => getTransactions()} style={{ marginLeft: 8 }}>
           Reset Data
         </Button>
         <Table
           columns={columns}
           dataSource={filteredTransactions}
-          rowKey="id"
+          rowKey="id_peminjaman"
           pagination={{ pageSize: 6 }}
           style={{ marginTop: 24 }}
         />
@@ -208,4 +245,4 @@ const TransactionVerification = () => {
   );
 };
 
-export default TransactionVerification; 
+export default TransactionVerification;

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import LandingPage from './landingpage';
 import Login from './Login';
 import Register from './Register';
 import Dashboard from './Dashboard';
@@ -16,12 +17,15 @@ import TransactionVerification from './admin/TransactionVerification';
 import UserManagement from './admin/UserManagement';
 import AdminLayout from './admin/AdminLayout';
 import AdminProfile from './admin/AdminProfile';
+import ContactUs from './ContactUs';
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/contact" element={<ContactUs />} />
       <Route element={<MainLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/books" element={<Books />} />

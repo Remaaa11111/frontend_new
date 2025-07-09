@@ -30,7 +30,7 @@ const Books = () => {
             <Header style={{ background: '#fff', padding: '0 24px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Title level={2} style={{ margin: 0 }}>Books Catalog</Title>
                 <Space>
-                    <Button type="text" icon={<LogoutOutlined />} onClick={() => navigate('/')}>Sign Out</Button>
+                    <Button type="text" icon={<LogoutOutlined />} onClick={() => navigate('/login')}>Sign Out</Button>
                     <Button
                         shape="circle"
                         icon={<UserOutlined />}

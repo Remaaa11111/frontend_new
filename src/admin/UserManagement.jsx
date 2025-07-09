@@ -4,14 +4,9 @@ import { DeleteOutlined, SearchOutlined, EyeOutlined, ReloadOutlined, LogoutOutl
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../providers/AuthProvider";
+import { getDataWithToken, deleteDataWithToken } from "../utils/api"; // pastikan sudah ada
 
 const { Title } = Typography;
-
-const dummyUsers = [
-  { id: 1, name: "Budi", email: "budi@mail.com", role: "member", status: "Aktif" },
-  { id: 2, name: "Sari", email: "sari@mail.com", role: "admin", status: "Aktif" },
-  { id: 3, name: "Andi", email: "andi@mail.com", role: "member", status: "Nonaktif" },
-];
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -21,8 +16,12 @@ const UserManagement = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Nanti fetch dari API
-    setUsers(dummyUsers);
+    const token = localStorage.getItem('token');
+    getDataWithToken("http://localhost:5000/api/users/", token)
+      .then((data) => setUsers(data))
+      .catch(() => {
+        api.error({ message: "Gagal mengambil data user" });
+      });
   }, []);
 
   const handleSearch = (e) => {
@@ -31,18 +30,28 @@ const UserManagement = () => {
 
   const filteredUsers = users.filter(
     (item) =>
-      item.name.toLowerCase().includes(searchText) ||
-      item.email.toLowerCase().includes(searchText) ||
+      (item.email && item.email.toLowerCase().includes(searchText)) ||
+      (item.role && item.role.toLowerCase().includes(searchText)) ||
       String(item.id).includes(searchText)
   );
 
   const handleDelete = (record) => {
-    // Nanti hapus via API
-    api.success({
-      message: "Hapus Pengguna Berhasil",
-      description: `Pengguna ${record.name} telah dihapus.`,
-    });
-    setUsers((prev) => prev.filter((item) => item.id !== record.id));
+    const token = localStorage.getItem('token');
+    deleteDataWithToken(`http://localhost:5000/api/users/${record.id}`, token)
+      .then((res) => {
+        if (res.message === "User deleted") {
+          api.success({
+            message: "Hapus Pengguna Berhasil",
+            description: `Pengguna ${record.email} telah dihapus.`,
+          });
+          setUsers((prev) => prev.filter((item) => item.id !== record.id));
+        } else {
+          api.error({ message: res.error || "Gagal menghapus user" });
+        }
+      })
+      .catch(() => {
+        api.error({ message: "Gagal menghapus user" });
+      });
   };
 
   const handleDetail = (record) => {
@@ -60,11 +69,6 @@ const UserManagement = () => {
       width: 60,
     },
     {
-      title: "Nama",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
       title: "Email",
       dataIndex: "email",
       key: "email",
@@ -79,10 +83,12 @@ const UserManagement = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status) => <Tag color={status === "Aktif" ? "green" : "red"}>{status}</Tag>,
+      render: (status) => <Tag color={status === "active" ? "green" : "red"}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Tag>,
     },
     {
-      title: "Aksi",
+      title: "Action",
       key: "action",
       render: (_, record) => (
         <Popconfirm
@@ -111,10 +117,10 @@ const UserManagement = () => {
       </Space>
       {contextHolder}
       <Card bordered={false} style={{ marginBottom: 24 }}>
-        <Title level={3}>Manajemen Pengguna</Title>
+        <Title level={3}>User Management</Title>
         <Input
           prefix={<SearchOutlined />}
-          placeholder="Cari nama, email, atau ID pengguna"
+          placeholder="Search name, email, or user ID"
           allowClear
           size="large"
           style={{ maxWidth: 400, margin: '16px 0' }}
