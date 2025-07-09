@@ -112,7 +112,7 @@ const Login = () => {
                 borderBottomLeftRadius: 24,
               }}
             >
-              Member
+              User
             </button>
             <button
               type="button"

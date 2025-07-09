@@ -12,6 +12,12 @@ const Books = () => {
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const genreList = [
+        'Novel', 'Comic', 'Encyclopedia', 'Biography',
+        'Science', 'Education', 'Mystery', 'History', 'Religion', 'Others'
+    ];
+    const [selectedGenre, setSelectedGenre] = useState('all');
+
     useEffect(() => {
         console.log("Fetching books...");
         setLoading(true);
@@ -49,11 +55,11 @@ const Books = () => {
                         />
                     </Col>
                     <Col>
-                        <Select defaultValue="all" style={{ width: 150 }}>
+                        <Select defaultValue="all" style={{ width: 150 }} onChange={setSelectedGenre}>
                             <Option value="all">All Genre</Option>
-                            <Option value="fiction">Fiction</Option>
-                            <Option value="non-fiction">Non-Fiction</Option>
-                            <Option value="fantasy">Fantasy</Option>
+                            {genreList.map(genre => (
+                                <Option key={genre} value={genre}>{genre}</Option>
+                            ))}
                         </Select>
                     </Col>
                 </Row>
@@ -61,24 +67,26 @@ const Books = () => {
                     <Title level={4}>Loading...</Title>
                 ) : (
                     <Row gutter={[16, 16]}>
-                        {books.map((book) => (
-                            <Col xs={24} sm={12} md={8} lg={6} key={book.id_buku}>
-                                <Link to={`/books/${book.id_buku}`}>
-                                    <Card
-                                        hoverable
-                                        cover={<img alt={book.judul} src={book.cover_image} style={{ height: 220, objectFit: 'cover' }} />}
-                                    >
-                                        <Card.Meta
-                                            title={book.judul}
-                                            description={book.penulis}
-                                        />
-                                        <div style={{ marginTop: 16 }}>
-                                            <Text strong>{book.status}</Text>
-                                        </div>
-                                    </Card>
-                                </Link>
-                            </Col>
-                        ))}
+                        {books
+                            .filter(book => selectedGenre === 'all' || (book.genre && book.genre.split(',').map(g => g.trim()).includes(selectedGenre)))
+                            .map((book) => (
+                                <Col xs={24} sm={12} md={8} lg={6} key={book.id_buku}>
+                                    <Link to={`/books/${book.id_buku}`}>
+                                        <Card
+                                            hoverable
+                                            cover={<img alt={book.judul} src={book.cover_image} style={{ height: 220, objectFit: 'cover' }} />}
+                                        >
+                                            <Card.Meta
+                                                title={book.judul}
+                                                description={book.penulis}
+                                            />
+                                            <div style={{ marginTop: 16 }}>
+                                                <Text strong>{book.status}</Text>
+                                            </div>
+                                        </Card>
+                                    </Link>
+                                </Col>
+                            ))}
                     </Row>
                 )}
             </Content>
