@@ -39,12 +39,12 @@ const Register = () => {
 
     // Buat FormData
     const formData = new FormData();
-    formData.append('nama', form.username.trim());
+    formData.append('username', form.username.trim());
     formData.append('email', form.email.trim());
-    formData.append('phone', form.phone.trim());
+    formData.append('phone_number', form.phone.trim());
     formData.append('password', form.password);
     formData.append('confirm_password', form.confirm);
-    formData.append('role', 'member');
+    formData.append('role', 'user');
 
     try {
       const response = await fetch('http://127.0.0.1:5000/api/auth/register', {
@@ -56,7 +56,10 @@ const Register = () => {
       const data = await response.json();
       if (response.ok) {
         alert('Registrasi berhasil! Silakan login.');
-        window.location.href = '/';
+        // Gunakan navigate ke /login setelah OK
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 100);
       } else {
         setError(data.error || 'Registrasi gagal');
       }
