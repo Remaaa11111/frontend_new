@@ -79,7 +79,7 @@ const History = () => {
 
   const columns = [
     {
-      title: 'Judul Buku',
+      title: 'Book Title',
       dataIndex: 'judul_buku',
       key: 'judul_buku'
     },
@@ -99,13 +99,13 @@ const History = () => {
       }
     },
     {
-      title: 'Waktu',
+      title: 'Date',
       dataIndex: 'waktu',
       key: 'waktu',
       render: waktu => dayjs(waktu).format('YYYY-MM-DD HH:mm')
     },
     {
-      title: 'Catatan',
+      title: 'Note',
       dataIndex: 'keterangan',
       key: 'keterangan'
     }
@@ -124,7 +124,7 @@ const History = () => {
         }}
       >
         <Title level={2} style={{ margin: 0 }}>
-          History Peminjaman
+          Borrowed History
         </Title>
         <Space>
           <Button
@@ -149,7 +149,7 @@ const History = () => {
             style={{ width: 180 }}
             onChange={setStatusFilter}
           >
-            <Option value="all">Semua Status</Option>
+            <Option value="all">All Status</Option>
             <Option value="returned">Returned</Option>
             <Option value="canceled">Canceled</Option>
             <Option value="dipinjam">Dipinjam</Option>
