@@ -17,6 +17,7 @@ const Books = () => {
         'Science', 'Education', 'Mystery', 'History', 'Religion', 'Others'
     ];
     const [selectedGenre, setSelectedGenre] = useState('all');
+    const [searchText, setSearchText] = useState('');
 
     useEffect(() => {
         console.log("Fetching books...");
@@ -52,6 +53,8 @@ const Books = () => {
                             placeholder="Search books..."
                             prefix={<SearchOutlined />}
                             style={{ width: 300 }}
+                            value={searchText}
+                            onChange={e => setSearchText(e.target.value)}
                         />
                     </Col>
                     <Col>
@@ -69,6 +72,14 @@ const Books = () => {
                     <Row gutter={[16, 16]}>
                         {books
                             .filter(book => selectedGenre === 'all' || (book.genre && book.genre.split(',').map(g => g.trim()).includes(selectedGenre)))
+                            .filter(book => {
+                                const search = searchText.trim().toLowerCase();
+                                if (!search) return true;
+                                return (
+                                    (book.judul && book.judul.toLowerCase().includes(search)) ||
+                                    (book.penulis && book.penulis.toLowerCase().includes(search))
+                                );
+                            })
                             .map((book) => (
                                 <Col xs={24} sm={12} md={8} lg={6} key={book.id_buku}>
                                     <Link to={`/books/${book.id_buku}`}>
