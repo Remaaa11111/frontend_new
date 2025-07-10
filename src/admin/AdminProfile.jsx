@@ -7,12 +7,14 @@ import {
   PhoneOutlined,
   HomeOutlined,
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 const { Title, Text } = Typography;
 
 const AdminProfile = () => {
   const [adminProfile, setAdminProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const iconStyle = { marginRight: '8px' };
 
@@ -64,6 +66,27 @@ const AdminProfile = () => {
               <Avatar size={128} src={adminProfile.avatar_url || "https://i.pravatar.cc/150?u=admin"} icon={<UserOutlined />} />
               <Title level={3} style={{ marginTop: 16 }}>{adminProfile.nama || 'Admin'}</Title>
               <Text type="secondary">{adminProfile.role}</Text>
+              <div style={{ margin: '16px 0' }}>
+                <button
+                  style={{
+                    background: '#4B7CA8',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 6,
+                    padding: '8px 24px',
+                    fontWeight: 500,
+                    fontSize: 16,
+                    cursor: 'pointer',
+                    marginTop: 8
+                  }}
+                  onClick={() => {
+                    localStorage.removeItem('access_token');
+                    navigate('/login');
+                  }}
+                >
+                  Sign Out
+                </button>
+              </div>
               <Divider />
             </Card>
           </Col>

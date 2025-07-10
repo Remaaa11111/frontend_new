@@ -43,17 +43,13 @@ ChartJS.register(
 
 const { Title, Text } = Typography;
 
-const StatCard = ({ icon, title, value, trend }) => (
+const StatCard = ({ icon, title, value }) => (
     <Card bordered={false} style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderRadius: '8px' }}>
         <Space align="center" size="large">
             <Avatar size={64} icon={icon} style={{ backgroundColor: '#e6f7ff', color: '#1890ff' }} />
             <div>
                 <Text type="secondary" style={{ fontSize: '16px' }}>{title}</Text>
                 <Title level={2} style={{ margin: 0 }}>{value}</Title>
-                <Space>
-                    {trend.change > 0 ? <ArrowUpOutlined style={{ color: 'green' }} /> : <ArrowDownOutlined style={{ color: 'red' }} />}
-                    <Text type={trend.change > 0 ? 'success' : 'danger'}>{trend.value}</Text>
-                </Space>
             </div>
         </Space>
     </Card>
@@ -62,9 +58,9 @@ const StatCard = ({ icon, title, value, trend }) => (
 const Dashboard = () => {
     const navigate = useNavigate();
     const [stats, setStats] = useState({
-        totalBooks: 0,
-        booksAvailable: 0,
-        booksBorrowed: 0,
+        totalBooks: 1,
+        booksAvailable: 2,
+        booksBorrowed: 3,
         totalMembers: 0,
         recentActivity: [],
         borrowChart: [],
@@ -100,11 +96,11 @@ const Dashboard = () => {
     }, []);
 
     const barChartData = {
-        labels: stats.borrowChart.map(item => item.bulan),
+        labels: ['Books Borrowed'],
         datasets: [
             {
                 label: 'Books Borrowed',
-                data: stats.borrowChart.map(item => item.jumlah),
+                data: [stats.booksBorrowed],
                 backgroundColor: 'rgba(54, 162, 235, 0.6)',
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1,
@@ -116,8 +112,19 @@ const Dashboard = () => {
         responsive: true,
         plugins: {
             legend: { position: 'top' },
-            title: { display: true, text: 'Monthly Borrowing Trends' },
+            title: { display: true, text: 'History Statistics' },
         },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    callback: function(value) {
+                        return Number.isInteger(value) ? value : null;
+                    }
+                }
+            }
+        }
     };
 
     return (
@@ -149,20 +156,20 @@ const Dashboard = () => {
 
             <Row gutter={[24, 24]} style={{ marginBottom: '24px' }}>
                 <Col xs={24} sm={12} lg={6}>
-                    <StatCard icon={<BookOutlined />} title="Total Books" value={stats.totalBooks} trend={{ value: '5.2%', change: 1 }} />
+                    <StatCard icon={<BookOutlined />} title="Total Books" value={stats.totalBooks} />
                 </Col>
                 <Col xs={24} sm={12} lg={6}>
-                    <StatCard icon={<CheckCircleOutlined />} title="Books Available" value={stats.booksAvailable} trend={{ value: '2.1%', change: 1 }} />
+                    <StatCard icon={<CheckCircleOutlined />} title="Books Available" value={stats.booksAvailable} />
                 </Col>
                 <Col xs={24} sm={12} lg={6}>
-                    <StatCard icon={<ReadOutlined />} title="Books Borrowed" value={stats.booksBorrowed} trend={{ value: '1.5%', change: -1 }} />
+                    <StatCard icon={<ReadOutlined />} title="Books Borrowed" value={stats.booksBorrowed} />
                 </Col>
             </Row>
 
             <Row gutter={[24, 24]}>
                 <Col xs={24} lg={16}>
                     <Card bordered={false} style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderRadius: '8px', height: '100%' }}>
-                        <Title level={4}>Borrowing Statistics</Title>
+                        <Title level={4}>History Statistics</Title>
                         <Bar options={barChartOptions} data={barChartData} />
                     </Card>
                 </Col>

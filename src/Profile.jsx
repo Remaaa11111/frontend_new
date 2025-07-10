@@ -66,19 +66,32 @@ const Profile = () => {
             <Avatar size={128} src={profile.avatar_url || ''} icon={<UserOutlined />} />
             <Title level={3} style={{ marginTop: 16 }}>{profile.nama || 'No Name'}</Title>
             <Text type="secondary">{profile.role || 'Member'}</Text>
-            <Button
-              type="primary"
-              danger
-              icon={<LogoutOutlined />}
-              style={{ marginTop: 16, width: '100%' }}
-              onClick={() => {
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('token');
-                navigate('/login');
-              }}
-            >
-              Logout
-            </Button>
+            <div style={{ margin: '16px 0' }}>
+              <button
+                style={{
+                  background: '#4B7CA8',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  padding: '8px 20px',
+                  fontWeight: 500,
+                  fontSize: 16,
+                  cursor: 'pointer',
+                  marginTop: 8,
+                  width: 'auto',
+                  transition: 'background 0.2s',
+                }}
+                onMouseOver={e => e.currentTarget.style.background = '#3a628a'}
+                onMouseOut={e => e.currentTarget.style.background = '#4B7CA8'}
+                onClick={() => {
+                  localStorage.removeItem('access_token');
+                  localStorage.removeItem('token');
+                  navigate('/login');
+                }}
+              >
+                Sign Out
+              </button>
+            </div>
             <Divider />
           </Card>
         </Col>
