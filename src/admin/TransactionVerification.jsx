@@ -1,10 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { Table, Input, Button, Tag, Space, Popconfirm, notification, Typography, Card } from "antd";
-import { CheckCircleOutlined, SearchOutlined, ReloadOutlined, LogoutOutlined, UserOutlined } from "@ant-design/icons";
+import React, { useState, useEffect, useContext } from "react";
+import {
+  Table,
+  Input,
+  Button,
+  Tag,
+  Space,
+  Popconfirm,
+  notification,
+  Typography,
+  Card,
+} from "antd";
+import {
+  CheckCircleOutlined,
+  SearchOutlined,
+  ReloadOutlined,
+  LogoutOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
 import { AuthContext } from "../providers/AuthProvider";
-import { getData, sendData } from "../utils/api"; // Import functions for API calls
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 
@@ -19,17 +34,16 @@ const TransactionVerification = () => {
     getTransactions();
   }, []);
 
-  // Get all transactions
   const getTransactions = () => {
-    const accessToken = localStorage.getItem('access_token');
-    fetch('/api/loans/', {
+    const accessToken = localStorage.getItem("access_token");
+    fetch("/api/loans/", {
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      }
+        Authorization: `Bearer ${accessToken}`,
+      },
     })
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(setTransactions)
-      .catch(err => console.error("Error fetching transactions:", err));
+      .catch((err) => console.error("Error fetching transactions:", err));
   };
 
   const handleSearch = (e) => setSearchText(e.target.value.toLowerCase());
@@ -41,11 +55,11 @@ const TransactionVerification = () => {
       String(item.id_peminjaman).includes(searchText)
   );
 
-  // Handle status update
   const handleVerify = (record, type) => {
     let newStatus = record.status;
-    let notifMsg = '';
-    let notifDesc = '';
+    let notifMsg = "";
+    let notifDesc = "";
+
     if (type === "Pickup" || type === "Pengambilan") {
       newStatus = "borrowed";
       notifMsg = `Pickup Verification Successful`;
@@ -56,21 +70,20 @@ const TransactionVerification = () => {
       notifDesc = `Transaction for ${record.email_user} - ${record.judul_buku} has been completed (returned).`;
     }
 
-    const accessToken = localStorage.getItem('access_token');
     const payload = {
       tanggal_kembali: new Date().toISOString().slice(0, 10),
       status: newStatus,
     };
 
     fetch(`/api/loans/update/${record.id_peminjaman}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
     })
-      .then(async res => {
+      .then(async (res) => {
         if (!res.ok) {
           const errorData = await res.json();
           throw new Error(errorData.error || "Gagal update");
@@ -98,23 +111,32 @@ const TransactionVerification = () => {
       });
   };
 
-  // Handle cancel
   const handleCancel = (record) => {
     api.info({
       message: "Pickup Cancelled",
       description: `Transaction for ${record.email_user} - ${record.judul_buku} has been cancelled.`,
     });
 
-    const formData = new FormData();
-    formData.append('tanggal_kembali', new Date().toISOString().slice(0, 10));
-    formData.append('status', 'cancelled');
+    const payload = {
+      tanggal_kembali: new Date().toISOString().slice(0, 10),
+      status: "cancelled",
+    };
 
-    sendData(
-      `/api/loans/update/${record.id_peminjaman}`,
-      formData,
-      'PUT', // <-- HARUS 'PUT'
-      true // isFormData
-    )
+    fetch(`/api/loans/update/${record.id_peminjaman}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Gagal cancel");
+        }
+        return res.json();
+      })
       .then(() => {
         setTransactions((prev) =>
           prev.map((item) =>
@@ -127,7 +149,7 @@ const TransactionVerification = () => {
       .catch((err) => {
         api.error({
           message: "Error Occurred",
-          description: "Failed to cancel transaction.",
+          description: err.message || "Failed to cancel transaction.",
         });
       });
   };
@@ -153,6 +175,7 @@ const TransactionVerification = () => {
       title: "Borrow Date",
       dataIndex: "tanggal_pinjam",
       key: "tanggal_pinjam",
+      render: (val) => dayjs(val).format("DD MMM YYYY"), // tampilkan tanggal tanpa jam
     },
     {
       title: "Status",
@@ -191,7 +214,7 @@ const TransactionVerification = () => {
                 cancelText="No"
               >
                 <Button danger style={{ marginLeft: 8 }}>
-                  Cancel Pickup
+                  Cancel
                 </Button>
               </Popconfirm>
             </>
@@ -212,12 +235,23 @@ const TransactionVerification = () => {
   ];
 
   return (
-    <div style={{ background: '#fff', minHeight: '100vh', padding: 8, marginLeft: 220 }}>
+    <div style={{ background: "#fff", minHeight: "100vh", padding: 8, marginLeft: 220 }}>
       <Space style={{ position: "absolute", right: 32, top: 24, zIndex: 20 }}>
-        <Button type="text" icon={<LogoutOutlined />} onClick={() => { logout(); navigate('/login'); }}>
+        <Button
+          type="text"
+          icon={<LogoutOutlined />}
+          onClick={() => {
+            logout();
+            navigate("/login");
+          }}
+        >
           Sign Out
         </Button>
-        <Button shape="circle" icon={<UserOutlined />} onClick={() => navigate('/admin/profile')} />
+        <Button
+          shape="circle"
+          icon={<UserOutlined />}
+          onClick={() => navigate("/admin/profile")}
+        />
       </Space>
       {contextHolder}
       <Card bordered={false} style={{ marginBottom: 24 }}>
@@ -227,7 +261,7 @@ const TransactionVerification = () => {
           placeholder="Search user name/ID or book title"
           allowClear
           size="large"
-          style={{ maxWidth: 400, margin: '16px 0' }}
+          style={{ maxWidth: 400, margin: "16px 0" }}
           onChange={handleSearch}
         />
         <Button icon={<ReloadOutlined />} onClick={() => getTransactions()} style={{ marginLeft: 8 }}>

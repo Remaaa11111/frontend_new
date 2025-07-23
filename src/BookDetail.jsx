@@ -12,7 +12,6 @@ const { Title, Paragraph, Text } = Typography;
 const { Content } = Layout;
 
 const BookDetail = () => {
-  // Semua hook di sini
   const { id } = useParams();
   const navigate = useNavigate();
   const [book, setBook] = useState(null);
@@ -24,11 +23,9 @@ const BookDetail = () => {
   const [tanggalPinjam, setTanggalPinjam] = useState(dayjs());
   const [tanggalKembali, setTanggalKembali] = useState(dayjs().add(7, 'day'));
 
-  // Hitung bookingDays (termasuk hari pinjam dan hari kembali)
   let bookingDays = tanggalKembali.diff(tanggalPinjam, 'day');
   if (bookingDays < 1) bookingDays = 1;
 
-  // Validasi tanggal kembali
   useEffect(() => {
     if (tanggalKembali.isBefore(tanggalPinjam, 'day')) {
       api.error({ message: 'Invalid Date', description: 'Return date cannot be before borrow date.' });
@@ -75,15 +72,12 @@ const BookDetail = () => {
     );
   }
 
-  // Fungsi booking buku
   const handleBooking = async () => {
     setBookingLoading(true);
     try {
-      // Ambil token
       const token = localStorage.getItem('access_token') || localStorage.getItem('token');
       if (!token) throw new Error('You must login first!');
-      
-      // Coba ambil id_anggota dari /api/profile
+
       let id_anggota = null;
       try {
         const profileRes = await fetch('http://localhost:5000/api/profile', {
@@ -101,37 +95,31 @@ const BookDetail = () => {
       } catch (profileErr) {
         console.log('Profile fetch failed, trying alternative method:', profileErr);
       }
-      
-      // Jika tidak bisa ambil dari profile, coba ambil dari token atau gunakan default
+
       if (!id_anggota) {
-        // Coba decode token untuk mendapatkan user info
         try {
           const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-          id_anggota = tokenPayload.id_anggota || tokenPayload.sub || '2'; // fallback ke ID 2
+          id_anggota = tokenPayload.id_anggota || tokenPayload.sub || '2';
         } catch (tokenErr) {
-          id_anggota = '2'; // fallback default
+          id_anggota = '2';
         }
       }
-      
+
       if (!id_anggota) throw new Error('Failed to get member ID.');
-      
-      // Siapkan tanggal pinjam & kembali dari input user
+
       const tanggal_pinjam = tanggalPinjam.format('YYYY-MM-DD');
       const tanggal_kembali = tanggalKembali.format('YYYY-MM-DD');
-      
-      // Siapkan FormData
+
       const payload = {
         user_id: id_anggota,
         book_id: id,
         tanggal_pinjam,
         tanggal_kembali,
-        status: 'borrowed' // <-- sesuai API baru
+        status: 'scheduled'
       };
-      console.log('Payload:', payload);
-      const data = await sendData('/api/loans/create', payload, true); // true = kirim sebagai JSON
-      
+      const data = await sendData('/api/loans/create', payload, true);
+
       if (data.id_peminjaman) {
-        // Update stok buku
         const stokBaru = (book.stok_buku || 0) - quantity;
         if (stokBaru >= 0) {
           const updatePayload = {
@@ -144,8 +132,7 @@ const BookDetail = () => {
             status: stokBaru === 0 ? 'not available' : 'available',
             harga: book.harga?.toString() || '0'
           };
-          await sendData(`/api/books/update/${id}`, updatePayload, true, 'PUT'); // true = kirim sebagai JSON
-          // Update state book di frontend
+          await sendData(`/api/books/update/${id}`, updatePayload, true, 'PUT');
           setBook(prev => ({
             ...prev,
             stok_buku: stokBaru,
@@ -153,7 +140,7 @@ const BookDetail = () => {
           }));
         }
         api.success({ message: 'Booking Success', description: 'Book has been added to your borrowings.' });
-        setTimeout(() => navigate('/my-borrowings'), 1200);
+        setTimeout(() => navigate('/History'), 1200);
       } else {
         throw new Error(data?.error || data?.message || 'Booking failed');
       }
@@ -164,23 +151,14 @@ const BookDetail = () => {
     }
   };
 
-  // Hitung total harga
   const hargaPerHari = Number(String(book.harga).replace(/\./g, ''));
   const totalPrice = book ? (hargaPerHari * bookingDays * quantity) : 0;
 
   return (
     <Layout style={{ background: '#f0f2f5', padding: '24px', width: '100%' }}>
-      <Title level={2} style={{ textAlign: 'center', marginBottom: '24px' }}>
-        Book Detail
-      </Title>
+      <Title level={2} style={{ textAlign: 'center', marginBottom: '24px' }}>Book Detail</Title>
       <Card variant="outlined">
-        <Breadcrumb
-          items={[
-            { title: 'Books', onClick: () => navigate('/books') },
-            { title: book.judul }
-          ]}
-        />
-
+        <Breadcrumb items={[{ title: 'Books', onClick: () => navigate('/books') }, { title: book.judul }]} />
         <Row gutter={24}>
           <Col span={8}>
             <img
@@ -209,9 +187,7 @@ const BookDetail = () => {
             <Paragraph style={{ marginTop: 16 }}>{book.deskripsi}</Paragraph>
 
             <Paragraph style={{ fontSize: 16, fontWeight: 500 }}>
-              Harga per hari: <Text type="success" strong>
-                Rp {hargaPerHari.toLocaleString('id-ID')}
-              </Text>
+              Harga per hari: <Text type="success" strong>Rp {hargaPerHari.toLocaleString('id-ID')}</Text>
             </Paragraph>
 
             <Divider />
@@ -220,12 +196,7 @@ const BookDetail = () => {
               <Col>
                 <Space>
                   <Text>Quantity:</Text>
-                  <InputNumber 
-                    min={1} 
-                    max={book.stok_buku} 
-                    value={quantity}
-                    onChange={setQuantity}
-                  />
+                  <InputNumber min={1} max={book.stok_buku} value={quantity} onChange={setQuantity} />
                 </Space>
               </Col>
             </Row>
@@ -236,9 +207,7 @@ const BookDetail = () => {
               </Col>
               <Col>
                 <Title level={4}>
-                  Total: <Text type="success" strong>
-                    Rp {totalPrice.toLocaleString('id-ID')}
-                  </Text>
+                  Total: <Text type="success" strong>Rp {totalPrice.toLocaleString('id-ID')}</Text>
                 </Title>
               </Col>
             </Row>
@@ -260,6 +229,7 @@ const BookDetail = () => {
               style={{ width: '100%', marginTop: 16 }}
               loading={bookingLoading}
               onClick={handleBooking}
+              disabled={book.stok_buku <= 0 || book.status === 'not available'}
             >
               Booking online now
             </Button>

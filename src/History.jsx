@@ -6,24 +6,23 @@ import {
   Button,
   Typography,
   Space,
-  DatePicker,
+  Input,
   Select,
   message,
   Spin
 } from 'antd';
-import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
+import { UserOutlined, LogoutOutlined, SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
-const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 const History = () => {
   const [historyData, setHistoryData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState(null);
+  const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const navigate = useNavigate();
 
@@ -68,14 +67,14 @@ const History = () => {
         key: idx.toString()
       }))
       .filter(item => {
-        const date = dayjs(item.waktu);
-        const inRange =
-          !dateRange || (date.isAfter(dateRange[0]) && date.isBefore(dateRange[1]));
-        const statusMatch =
-          statusFilter === 'all' || item.status === statusFilter.toLowerCase();
-        return inRange && statusMatch;
+        const search = searchText.trim().toLowerCase();
+        if (!search) return true;
+        return item.judul_buku && item.judul_buku.toLowerCase().includes(search);
+      })
+      .filter(item => {
+        return statusFilter === 'all' || item.status === statusFilter.toLowerCase();
       });
-  }, [historyData, dateRange, statusFilter]);
+  }, [historyData, searchText, statusFilter]);
 
   const columns = [
     {
@@ -92,8 +91,10 @@ const History = () => {
         let color = 'default';
 
         if (status === 'returned') color = 'green';
-        else if (status === 'canceled') color = 'red';
-        else if (status === 'dipinjam') color = 'blue';
+        else if (status === 'canceled' || status === 'cancelled') color = 'red';
+        else if (status === 'borrowed') color = 'blue';
+        else if (status === 'scheduled') color = 'orange';
+        else if (status === 'overdue') color = 'volcano';
 
         return <Tag color={color}>{upper}</Tag>;
       }
@@ -102,7 +103,7 @@ const History = () => {
       title: 'Date',
       dataIndex: 'waktu',
       key: 'waktu',
-      render: waktu => dayjs(waktu).format('YYYY-MM-DD HH:mm')
+      render: waktu => dayjs(waktu).format('YYYY-MM-DD') // hanya tanggal
     },
     {
       title: 'Note',
@@ -143,16 +144,25 @@ const History = () => {
       </Header>
       <Content style={{ padding: 24 }}>
         <Space style={{ marginBottom: 24 }}>
-          <RangePicker onChange={setDateRange} />
+          <Input
+            placeholder="Search Book Title..."
+            value={searchText}
+            onChange={e => setSearchText(e.target.value)}
+            style={{ width: 300 }}
+            allowClear
+            prefix={<SearchOutlined />}
+          />
           <Select
             defaultValue="all"
             style={{ width: 180 }}
             onChange={setStatusFilter}
           >
             <Option value="all">All Status</Option>
+            <Option value="scheduled">Scheduled</Option>
+            <Option value="borrowed">Borrowed</Option>
             <Option value="returned">Returned</Option>
-            <Option value="canceled">Canceled</Option>
-            <Option value="dipinjam">Dipinjam</Option>
+            <Option value="overdue">Overdue</Option>
+            <Option value="cancelled">Cancelled</Option>
           </Select>
         </Space>
         {loading ? (

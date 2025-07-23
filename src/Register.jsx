@@ -44,7 +44,7 @@ const Register = () => {
     formData.append('phone_number', form.phone.trim());
     formData.append('password', form.password);
     formData.append('confirm_password', form.confirm);
-    formData.append('role', 'user');
+    formData.append('role', 'member');
 
     try {
       const response = await fetch('http://127.0.0.1:5000/api/auth/register', {
